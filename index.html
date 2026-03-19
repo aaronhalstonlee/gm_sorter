@@ -375,7 +375,14 @@ function show(id){document.getElementById(id).classList.remove('hidden');}
 function hide(id){document.getElementById(id).classList.add('hidden');}
 function clearAll(){sessions=[];trips=[];solos=[];document.getElementById('pasteArea').value='';document.getElementById('debugOut').classList.add('hidden');hide('optCard');hide('resultCard');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
-if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+if ('serviceWorker' in navigator) {
+  // Unregister ALL existing service workers, then register fresh
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    Promise.all(regs.map(r => r.unregister())).then(() => {
+      navigator.serviceWorker.register('sw.js');
+    });
+  });
+}
 </script>
 </body>
 </html>
