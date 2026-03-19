@@ -56,7 +56,7 @@ select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0
 </head>
 <body>
 
-<h1>✈️ GM Training Trip Planner <span style="font-size:.7rem;color:#484868;font-weight:400">v9</span></h1>
+<h1>✈️ GM Training Trip Planner <span style="font-size:.7rem;color:#484868;font-weight:400">v10</span></h1>
 <p class="sub">Paste your schedule → groups by location into efficient trips · ≤1 day gap rule</p>
 
 <div class="card">
@@ -270,6 +270,8 @@ function runGrouping() {
     if (loc.includes('Dallas')) {
       let d = `\nDallas dedup (${cls.length}→${deduped.length}):\n`;
       cls.forEach((s,i) => d += `  [${keep.has(i)?'KEEP':'DROP'}] ${fmtDate(s.date)} ${s.course}\n`);
+      d += `\nDeduped array:\n`;
+      deduped.forEach(s => d += `  ${fmtDate(s.date)} ${s.course}\n`);
       document.getElementById('debugOut').innerHTML += d;
     }
     let cluster=[cls[0]];
@@ -281,12 +283,12 @@ function runGrouping() {
     flush(loc,cluster,tid++);
   });
 
-  function flush(loc,cls,id){
-    const s0=cls[0];
-    const city=groupMode==='center'?s0.city:loc;
-    const start=cls[0].date, end=cls[cls.length-1].dateEnd;
-    const obj={id,loc,city,cls,start,end,nights:diffDays(start,end)};
-    if(cls.length===1) solos.push(obj); else trips.push(obj);
+  function flush(loc, sessions, id){
+    const s0 = sessions[0];
+    const city = groupMode==='center' ? s0.city : loc;
+    const start = sessions[0].date, end = sessions[sessions.length-1].dateEnd;
+    const obj = {id, loc, city, cls:sessions, start, end, nights:diffDays(start,end)};
+    if(sessions.length===1) solos.push(obj); else trips.push(obj);
   }
 
   show('resultCard'); renderResults();
