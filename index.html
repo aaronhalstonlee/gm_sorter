@@ -343,4 +343,15 @@ function buildRows(){
 }
 function toTSV(d){return d.map(r=>r.join('\t')).join('\n');}
 function toCSV(d){const q=v=>{v=String(v??'');return(v.includes(',')||v.includes('"'))?'"'+v.replace(/"/g,'""')+'"':v;};return d.map(r=>r.map(q).join(',')).join('\n');}
-function copyTSV(){const t=toTSV(buildRows());(navigator.clipboard?.writeText(t)||Promise.reject()).then(()=>toast('Copied ✓')).catch(()=>{fa
+function copyTSV(){const t=toTSV(buildRows());(navigator.clipboard?.writeText(t)||Promise.reject()).then(()=>toast('Copied ✓')).catch(()=>{fallbackCopy(t);toast('Copied ✓');});}
+function fallbackCopy(t){const el=Object.assign(document.createElement('textarea'),{value:t,style:'position:fixed;opacity:0'});document.body.appendChild(el);el.select();document.execCommand('copy');el.remove();}
+function downloadCSV(){const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([toCSV(buildRows())],{type:'text/csv'})),download:'gm_trip_plan.csv'});a.click();URL.revokeObjectURL(a.href);}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function show(id){document.getElementById(id).classList.remove('hidden');}
+function hide(id){document.getElementById(id).classList.add('hidden');}
+function clearAll(){sessions=[];trips=[];solos=[];document.getElementById('pasteArea').value='';document.getElementById('debugOut').classList.add('hidden');hide('optCard');hide('resultCard');}
+function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
