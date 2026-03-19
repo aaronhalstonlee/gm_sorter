@@ -56,7 +56,7 @@ select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0
 </head>
 <body>
 
-<h1>✈️ GM Training Trip Planner <span style="font-size:.7rem;color:#484868;font-weight:400">v3</span></h1>
+<h1>✈️ GM Training Trip Planner <span style="font-size:.7rem;color:#484868;font-weight:400">v4</span></h1>
 <p class="sub">Paste your schedule → groups by location into efficient trips · ≤1 day gap rule</p>
 
 <div class="card">
@@ -263,12 +263,27 @@ function runGrouping() {
     flush(loc,cluster,tid++);
   });
 
+  function dedupe(cls) {
+    // Collapse consecutive rows with same course code into one entry with a date range
+    const out = [];
+    for (const s of cls) {
+      const prev = out[out.length - 1];
+      if (prev && prev.course === s.course && diffDays(prev.dateEnd, s.date) <= 1) {
+        prev.dateEnd = s.date; // extend the range
+      } else {
+        out.push({ ...s, dateEnd: s.date });
+      }
+    }
+    return out;
+  }
+
   function flush(loc,cls,id){
     const s0=cls[0];
     const city=groupMode==='center'?s0.city:loc;
+    const deduped=dedupe(cls);
     const start=cls[0].date, end=cls[cls.length-1].date;
-    const obj={id,loc,city,cls,start,end,nights:diffDays(start,end)};
-    if(cls.length===1) solos.push(obj); else trips.push(obj);
+    const obj={id,loc,city,cls:deduped,start,end,nights:diffDays(start,end)};
+    if(deduped.length===1) solos.push(obj); else trips.push(obj);
   }
 
   show('resultCard'); renderResults();
@@ -310,7 +325,7 @@ function renderResults(){
           const gap=ci>0?diffDays(t.cls[ci-1].date,s.date):0;
           const gw=gap>1?`<span class="gap-warn">⚠ ${gap-1}d gap</span>`:'';
           return `<div class="cls">
-            <div class="cls-date">${fmtDate(s.date)}${gw}</div>
+            <div class="cls-date">${s.dateEnd && s.dateEnd.getTime()!==s.date.getTime() ? fmtShort(s.date)+' → '+fmtShort(s.dateEnd) : fmtDate(s.date)}${gw}</div>
             <div class="cls-course">${esc(s.course)}</div>
             ${s.colC?`<div class="cls-seats">${s.colC} seats available</div>`:''}
           </div>`;
