@@ -56,7 +56,7 @@ select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0
 </head>
 <body>
 
-<h1>✈️ GM Training Trip Planner <span style="font-size:.7rem;color:#484868;font-weight:400">v8</span></h1>
+<h1>✈️ GM Training Trip Planner <span style="font-size:.7rem;color:#484868;font-weight:400">v9</span></h1>
 <p class="sub">Paste your schedule → groups by location into efficient trips · ≤1 day gap rule</p>
 
 <div class="card">
@@ -265,6 +265,13 @@ function runGrouping() {
       if (!hasLater) keep.add(i);
     }
     const deduped = cls.filter((_,i) => keep.has(i));
+
+    // Debug: log dedup results for Dallas only
+    if (loc.includes('Dallas')) {
+      let d = `\nDallas dedup (${cls.length}→${deduped.length}):\n`;
+      cls.forEach((s,i) => d += `  [${keep.has(i)?'KEEP':'DROP'}] ${fmtDate(s.date)} ${s.course}\n`);
+      document.getElementById('debugOut').innerHTML += d;
+    }
     let cluster=[cls[0]];
     for (let i=1; i<cls.length; i++) {
       const gap = diffDays(cls[i-1].date, cls[i].date);
