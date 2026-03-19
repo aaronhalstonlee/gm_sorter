@@ -1,4 +1,4 @@
-const CACHE = 'sort-tool-v1';
+const CACHE = 'sort-tool-v4';
 self.addEventListener('install', e => e.waitUntil(
   caches.open(CACHE).then(c => c.addAll(['./']))
 ));
