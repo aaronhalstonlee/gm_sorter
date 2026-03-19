@@ -24,20 +24,13 @@ button:hover{opacity:.82}button:active{opacity:.62}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
 select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0f0;padding:6px 9px;font-size:.8rem}
 .hidden{display:none!important}
-
-/* option pills */
 .opts{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
 .opt{padding:5px 12px;border-radius:20px;border:1px solid #252545;background:#12122a;color:#7080b0;font-size:.75rem;cursor:pointer;transition:all .15s}
 .opt.on{background:#2a3a80;border-color:#4555cc;color:#c8d4ff}
-.hint{font-size:.72rem;color:#484868;margin-top:4px}
-
-/* stats */
 .stat-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
 .stat{background:#141424;border:1px solid #202040;border-radius:8px;padding:8px 14px;text-align:center;min-width:80px}
 .stat-n{font-size:1.3rem;font-weight:700;color:#a0b4ff}
 .stat-l{font-size:.68rem;color:#484868;margin-top:1px}
-
-/* trip cards */
 #results{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
 .trip{background:#0d0d1e;border:1px solid #202040;border-radius:10px;padding:14px}
 .trip-header{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px}
@@ -45,23 +38,18 @@ select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0
 .trip-meta h3{font-size:.88rem;font-weight:700;color:#c8d8ff;margin-bottom:1px}
 .trip-meta .city{font-size:.72rem;color:#484868}
 .trip-meta .dates{font-size:.72rem;color:#5060a0}
-.trip-meta .nights{font-size:.7rem;color:#384060;margin-top:1px}
-
 .cls{padding:7px 0;border-bottom:1px solid #161628;font-size:.76rem}
 .cls:last-child{border-bottom:none}
 .cls-date{color:#4555a0;font-size:.7rem;margin-bottom:2px}
 .cls-course{color:#c8d0e8;font-weight:600;font-size:.78rem}
 .cls-seats{color:#484868;font-size:.68rem;margin-top:1px}
 .gap-warn{display:inline-block;background:#2a1a00;color:#d08030;font-size:.67rem;padding:1px 6px;border-radius:4px;margin-left:6px}
-
 .section-label{font-size:.72rem;font-weight:700;color:#484868;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px;grid-column:1/-1}
 .sort-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
 .sort-row label{font-size:.75rem;color:#5060a0}
-
-/* parse summary */
-.parse-info{background:#0d1020;border:1px solid #1a1a40;border-radius:6px;padding:10px 12px;font-size:.75rem;color:#5060a0;margin-top:10px;line-height:1.8}
-.parse-info span{color:#8090c0}
-
+.debug{background:#0a1a0a;border:1px solid #1a3a1a;border-radius:6px;padding:10px 12px;font-size:.72rem;color:#408040;margin-top:10px;line-height:2;font-family:monospace;max-height:160px;overflow-y:auto}
+.debug .warn{color:#c08030}
+.debug .ok{color:#40d090}
 #toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(70px);background:#103828;color:#40d090;padding:9px 20px;border-radius:20px;font-size:.8rem;transition:transform .3s;z-index:999;pointer-events:none}
 #toast.show{transform:translateX(-50%) translateY(0)}
 </style>
@@ -71,18 +59,16 @@ select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0
 <h1>✈️ GM Training Trip Planner</h1>
 <p class="sub">Paste your schedule → groups by location into efficient trips · ≤1 day gap rule</p>
 
-<!-- STEP 1 -->
 <div class="card">
   <h2>1 — Paste your schedule from Google Sheets</h2>
-  <textarea id="pasteArea" placeholder="Select all cells in your schedule sheet and paste here (Ctrl+A, Ctrl+C in Sheets).&#10;&#10;The tool understands the GM schedule format:&#10;  • Course code rows (16410.12H, etc.) are used as labels&#10;  • X rows (Time conflict / Past Cutoff) are automatically skipped&#10;  • Location = Training Center name (col D)&#10;  • Date = session start date (col B)"></textarea>
+  <textarea id="pasteArea" placeholder="Select all cells in your schedule sheet and paste here (Ctrl+A, Ctrl+C in Sheets)."></textarea>
   <div class="row">
     <button class="bp" onclick="loadData()">Parse Schedule</button>
     <button class="bs sm" onclick="clearAll()">Clear</button>
   </div>
-  <div id="parseInfo" class="parse-info hidden"></div>
+  <div id="debugOut" class="debug hidden"></div>
 </div>
 
-<!-- STEP 2 filter options -->
 <div class="card hidden" id="optCard">
   <h2>2 — Filter options</h2>
   <p style="font-size:.75rem;color:#484868;margin-bottom:8px">Which rows to include:</p>
@@ -100,7 +86,6 @@ select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0
   </div>
 </div>
 
-<!-- STEP 3 results -->
 <div class="card hidden" id="resultCard">
   <h2>3 — Your trips</h2>
   <div class="stat-bar" id="statBar"></div>
@@ -122,56 +107,77 @@ select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0
 <div id="toast"></div>
 
 <script>
-/* ─── State ─── */
-let sessions = [], trips = [], solos = [];
-let groupMode = 'center';
-const opts = {'skip-x':true,'skip-full':true};
+let sessions=[], trips=[], solos=[];
+let groupMode='center';
+const opts={'skip-x':true,'skip-full':true};
 const PALETTE=['#3a55e0','#2a9d40','#c05020','#9030a0','#20809d','#b09010','#205090','#a03060','#208060','#804010'];
 
-/* ─── Parsing ─── */
-function parseTSV(text){
-  // Normalize line endings, split into lines
-  return text.trim().split(/\r?\n/).map(l => {
-    // TSV split: handle quoted cells
-    const cells=[];let cur='',inQ=false;
-    for(let i=0;i<l.length;i++){
-      const c=l[i];
-      if(c==='"'){if(inQ&&l[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}
-      else if(c==='\t'&&!inQ){cells.push(cur.trim());cur='';}
-      else cur+=c;
+/* ── Robust TSV parser ── */
+function parseTSV(raw) {
+  // Walk character by character to correctly handle:
+  // - quoted cells containing literal newlines (Google Sheets multi-line cells)
+  // - escaped double-quotes ("")
+  const rows = [];
+  let cells = [], cur = '', inQ = false, i = 0;
+  while (i < raw.length) {
+    const c = raw[i];
+    if (inQ) {
+      if (c === '"') {
+        if (raw[i+1] === '"') { cur += '"'; i += 2; continue; } // escaped quote
+        else { inQ = false; i++; continue; } // end quote
+      } else if (c === '\n' || c === '\r') {
+        cur += ' '; // collapse embedded newline to space
+        if (c === '\r' && raw[i+1] === '\n') i++;
+        i++; continue;
+      } else { cur += c; i++; continue; }
+    } else {
+      if (c === '"') { inQ = true; i++; continue; }
+      else if (c === '\t') { cells.push(cur.trim()); cur = ''; i++; continue; }
+      else if (c === '\n' || c === '\r') {
+        cells.push(cur.trim()); rows.push(cells);
+        cells = []; cur = '';
+        if (c === '\r' && raw[i+1] === '\n') i++;
+        i++; continue;
+      } else { cur += c; i++; continue; }
     }
-    cells.push(cur.trim());
-    return cells;
-  });
+  }
+  if (cur || cells.length) { cells.push(cur.trim()); rows.push(cells); }
+  return rows;
 }
 
-// Detect if a cell looks like a course code (e.g. 16410.12H, 16043.01H, 19047.00H-R2)
-function isCourseCode(s){
-  return /^\d{5,6}\.\d{2}[A-Za-z]/.test(s.trim());
+function isCourseCode(s) {
+  return /^\d{4,6}\.\d{2}[A-Za-z0-9]/.test(s.trim());
 }
 
-function parseDate(s){
-  if(!s) return null;
-  s = s.replace(/\n/g,' ').trim();
-  // Extract first date part from "3/20/2026 8:00 AM to 3/20/2026 5:00 PM"
-  const m = s.match(/(\d{1,2}\/\d{1,2}\/\d{2,4})/);
-  if(m){ const d=new Date(m[1]); if(!isNaN(d)) return d; }
-  const d=new Date(s); return isNaN(d)?null:d;
+function parseDate(s) {
+  if (!s) return null;
+  // Extract first date pattern M/D/YYYY from the cell value
+  const m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+  if (m) {
+    const d = new Date(+m[3], +m[1]-1, +m[2]);
+    if (!isNaN(d)) return d;
+  }
+  return null;
 }
 
 function fmtDate(d){ return d?d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'?'; }
 function fmtShort(d){ return d?d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):'?'; }
-function diffDays(a,b){ return Math.round((b-a)/864e5); }
+function diffDays(a,b){ return Math.round((b-a)/86400000); }
 
-function loadData(){
-  const text = document.getElementById('pasteArea').value.trim();
-  if(!text){ alert('Paste your schedule data first.'); return; }
+function loadData() {
+  const raw = document.getElementById('pasteArea').value;
+  if (!raw.trim()) { alert('Paste your schedule first.'); return; }
 
-  const rows = parseTSV(text);
+  const rows = parseTSV(raw);
+  const dbg = document.getElementById('debugOut');
+  dbg.classList.remove('hidden');
+
+  let log = '';
   let currentCourse = '(Unknown)';
-  let parsed=[], skippedX=0, skippedNoDate=0, courseCodes=new Set();
+  const parsed = [], courseCodes = new Set();
+  let skippedNoData = 0, skippedX = 0;
 
-  for(const r of rows){
+  for (const r of rows) {
     const colA = (r[0]||'').trim();
     const colB = (r[1]||'').trim();
     const colC = (r[2]||'').trim();
@@ -180,101 +186,99 @@ function loadData(){
     const colF = (r[5]||'').trim();
     const colH = (r[7]||'').trim();
 
-    // Course code header row
-    if(isCourseCode(colA)){
+    if (isCourseCode(colA)) {
       currentCourse = colA;
       courseCodes.add(colA);
       continue;
     }
 
-    // Row with X = flagged (time conflict / past cutoff)
     const isX = colA === 'X';
     const note = colH.toLowerCase();
     const isFlagged = isX || note.includes('conflict') || note.includes('cutoff') || note.includes('past');
 
-    // Must have a date and a location
     const date = parseDate(colB);
     const center = colD;
-    const city   = [colE, colF].filter(Boolean).join(', ');
 
-    if(!date || !center){ skippedNoDate++; continue; }
+    if (!date || !center) { skippedNoData++; continue; }
 
-    const seats = parseInt(colC)||0;
-
-    parsed.push({ course:currentCourse, date, center, city, seats, isX:isFlagged, colC });
+    const seats = parseInt(colC) || 0;
+    parsed.push({ course:currentCourse, date, center, city:[colE,colF].filter(Boolean).join(', '), seats, isX:isFlagged, colC });
   }
 
   sessions = parsed;
 
-  // Show parse summary
-  const pi = document.getElementById('parseInfo');
-  pi.classList.remove('hidden');
-  pi.innerHTML = `Parsed <span>${rows.length}</span> rows → found <span>${courseCodes.size}</span> course codes, <span>${parsed.length}</span> sessions total &nbsp;·&nbsp; <span>${parsed.filter(s=>s.isX).length}</span> flagged (✕) &nbsp;·&nbsp; <span>${skippedNoDate}</span> skipped (no date/location)`;
+  const flagged = parsed.filter(s=>s.isX).length;
+  const valid = parsed.filter(s=>!s.isX).length;
+  log += `<span class="ok">✓ Raw rows parsed: ${rows.length}</span>\n`;
+  log += `Course codes found: ${courseCodes.size} → [${[...courseCodes].slice(0,4).join(', ')}${courseCodes.size>4?'…':''}]\n`;
+  log += `Sessions parsed: ${parsed.length} total · ${valid} valid · ${flagged} flagged (✕) · ${skippedNoData} skipped (no date/center)\n`;
 
-  show('optCard'); hide('resultCard');
+  // Show sample of first 3 valid sessions for verification
+  const samples = parsed.filter(s=>!s.isX).slice(0,3);
+  samples.forEach(s => {
+    log += `  → ${s.course} | ${fmtDate(s.date)} | ${s.center}\n`;
+  });
+
+  if (parsed.length === 0) {
+    log += `<span class="warn">⚠ No sessions parsed — check that Col B has dates and Col D has location names</span>\n`;
+  }
+
+  dbg.innerHTML = log;
+
+  if (parsed.length > 0) { show('optCard'); hide('resultCard'); }
 }
 
-function toggleOpt(el, key){
-  opts[key] = !opts[key];
-  el.classList.toggle('on', opts[key]);
-}
+function toggleOpt(el,key){ opts[key]=!opts[key]; el.classList.toggle('on',opts[key]); }
 function setGroup(mode){
-  groupMode = mode;
-  document.getElementById('opt-group-center').classList.toggle('on', mode==='center');
-  document.getElementById('opt-group-city').classList.toggle('on', mode==='city');
+  groupMode=mode;
+  document.getElementById('opt-group-center').classList.toggle('on',mode==='center');
+  document.getElementById('opt-group-city').classList.toggle('on',mode==='city');
 }
 
-/* ─── Grouping ─── */
-function runGrouping(){
+function runGrouping() {
   let filtered = sessions.filter(s => {
-    if(opts['skip-x'] && s.isX) return false;
-    if(opts['skip-full'] && s.seats===0) return false;
+    if (opts['skip-x'] && s.isX) return false;
+    if (opts['skip-full'] && s.seats===0) return false;
     return true;
   });
 
   const getKey = s => groupMode==='center' ? s.center : s.city;
+  const byLoc = {};
+  filtered.forEach(s => { const k=getKey(s); (byLoc[k]=byLoc[k]||[]).push(s); });
 
-  const byLoc={};
-  filtered.forEach(s=>{ const k=getKey(s); (byLoc[k]=byLoc[k]||[]).push(s); });
+  trips=[]; solos=[]; let tid=1;
 
-  trips=[]; solos=[];
-  let tid=1;
-
-  Object.entries(byLoc).forEach(([loc,cls])=>{
+  Object.entries(byLoc).forEach(([loc,cls]) => {
     cls.sort((a,b)=>a.date-b.date);
     let cluster=[cls[0]];
-    for(let i=1;i<cls.length;i++){
-      const gap=diffDays(cls[i-1].date, cls[i].date);
-      if(gap<=2) cluster.push(cls[i]);
+    for (let i=1; i<cls.length; i++) {
+      const gap = diffDays(cls[i-1].date, cls[i].date);
+      if (gap<=2) cluster.push(cls[i]);
       else { flush(loc,cluster,tid++); cluster=[cls[i]]; }
     }
     flush(loc,cluster,tid++);
   });
 
   function flush(loc,cls,id){
-    // get city from first session with that center
-    const s0 = cls[0];
-    const city = groupMode==='center' ? s0.city : loc;
-    const center = groupMode==='center' ? loc : '';
+    const s0=cls[0];
+    const city=groupMode==='center'?s0.city:loc;
     const start=cls[0].date, end=cls[cls.length-1].date;
-    const obj={id,loc,center,city,cls,start,end,nights:diffDays(start,end)};
+    const obj={id,loc,city,cls,start,end,nights:diffDays(start,end)};
     if(cls.length===1) solos.push(obj); else trips.push(obj);
   }
 
-  show('resultCard');
-  renderResults();
+  show('resultCard'); renderResults();
 }
 
-/* ─── Render ─── */
 function renderResults(){
-  const mode = document.getElementById('sortMode').value;
-  const all = [...trips];
+  const mode=document.getElementById('sortMode').value;
+  const all=[...trips];
   if(mode==='date') all.sort((a,b)=>a.start-b.start);
   else if(mode==='count') all.sort((a,b)=>b.cls.length-a.cls.length);
   else all.sort((a,b)=>a.loc.localeCompare(b.loc));
 
-  const total = [...trips,...solos].reduce((s,t)=>s+t.cls.length,0);
-  const locs = new Set([...trips,...solos].map(t=>t.loc));
+  const total=[...trips,...solos].reduce((s,t)=>s+t.cls.length,0);
+  const locs=new Set([...trips,...solos].map(t=>t.loc));
 
   document.getElementById('statBar').innerHTML=`
     <div class="stat"><div class="stat-n">${trips.length}</div><div class="stat-l">Multi-session trips</div></div>
@@ -284,34 +288,27 @@ function renderResults(){
     <div class="stat"><div class="stat-n">${new Set([...trips,...solos].flatMap(t=>t.cls.map(c=>c.course))).size}</div><div class="stat-l">Courses</div></div>
   `;
 
-  const el = document.getElementById('results');
-  let html = '';
+  const el=document.getElementById('results');
+  let html='';
 
   if(all.length){
-    html += `<div class="section-label">✈️ Multi-session trips (${all.length})</div>`;
+    html+=`<div class="section-label">✈️ Multi-session trips (${all.length})</div>`;
     all.forEach((t,i)=>{
-      const col = PALETTE[i%PALETTE.length];
-      const sub = t.center && t.city ? `<div class="city">${esc(t.city)}</div>` : '';
-      const span = t.nights>0
-        ? `${fmtShort(t.start)} → ${fmtShort(t.end)} &nbsp;·&nbsp; ${t.nights} night${t.nights!==1?'s':''} on-site`
-        : fmtDate(t.start);
-      html += `<div class="trip">
+      const col=PALETTE[i%PALETTE.length];
+      const sub=t.city?`<div class="city">${esc(t.city)}</div>`:'';
+      const span=t.nights>0?`${fmtShort(t.start)} → ${fmtShort(t.end)} &nbsp;·&nbsp; ${t.nights} night${t.nights!==1?'s':''} on-site`:fmtDate(t.start);
+      html+=`<div class="trip">
         <div class="trip-header">
           <div class="trip-num" style="background:${col}22;color:${col}">${t.cls.length}</div>
-          <div class="trip-meta">
-            <h3>${esc(t.loc)}</h3>
-            ${sub}
-            <div class="dates">${span}</div>
-          </div>
+          <div class="trip-meta"><h3>${esc(t.loc)}</h3>${sub}<div class="dates">${span}</div></div>
         </div>
         ${t.cls.map((s,ci)=>{
-          const gap = ci>0 ? diffDays(t.cls[ci-1].date, s.date) : 0;
-          const gapWarn = gap>1 ? `<span class="gap-warn">⚠ ${gap-1}d gap</span>` : '';
-          const seats = s.colC ? `<div class="cls-seats">${s.colC} seats available</div>` : '';
+          const gap=ci>0?diffDays(t.cls[ci-1].date,s.date):0;
+          const gw=gap>1?`<span class="gap-warn">⚠ ${gap-1}d gap</span>`:'';
           return `<div class="cls">
-            <div class="cls-date">${fmtDate(s.date)}${gapWarn}</div>
+            <div class="cls-date">${fmtDate(s.date)}${gw}</div>
             <div class="cls-course">${esc(s.course)}</div>
-            ${seats}
+            ${s.colC?`<div class="cls-seats">${s.colC} seats available</div>`:''}
           </div>`;
         }).join('')}
       </div>`;
@@ -319,17 +316,13 @@ function renderResults(){
   }
 
   if(solos.length){
-    html += `<div class="section-label">📌 Solo stops — only one session at this location</div>`;
+    html+=`<div class="section-label">📌 Solo stops</div>`;
     solos.forEach(t=>{
       const s=t.cls[0];
-      html += `<div class="trip">
+      html+=`<div class="trip">
         <div class="trip-header">
           <div class="trip-num" style="background:#30103055;color:#9050c0">1</div>
-          <div class="trip-meta">
-            <h3>${esc(t.loc)}</h3>
-            ${t.city?`<div class="city">${esc(t.city)}</div>`:''}
-            <div class="dates">${fmtDate(t.start)}</div>
-          </div>
+          <div class="trip-meta"><h3>${esc(t.loc)}</h3>${t.city?`<div class="city">${esc(t.city)}</div>`:''}<div class="dates">${fmtDate(t.start)}</div></div>
         </div>
         <div class="cls">
           <div class="cls-course">${esc(s.course)}</div>
@@ -339,59 +332,15 @@ function renderResults(){
     });
   }
 
-  el.innerHTML = html || '<p style="color:#383858;font-size:.8rem">No results.</p>';
+  el.innerHTML=html||'<p style="color:#383858;font-size:.8rem">No results.</p>';
 }
 
-/* ─── Export ─── */
 function buildRows(){
-  const all = [...trips,...solos].sort((a,b)=>a.start-b.start);
+  const all=[...trips,...solos].sort((a,b)=>a.start-b.start);
   const out=[['Trip ID','Location','City','Start','End','Nights','Course','Date','Seats']];
-  all.forEach(t=>{
-    t.cls.forEach(s=>{
-      out.push([t.id, t.loc, t.city||'', fmtDate(t.start), fmtDate(t.end), t.nights, s.course, fmtDate(s.date), s.colC||'']);
-    });
-  });
+  all.forEach(t=>t.cls.forEach(s=>out.push([t.id,t.loc,t.city||'',fmtDate(t.start),fmtDate(t.end),t.nights,s.course,fmtDate(s.date),s.colC||''])));
   return out;
 }
-function toTSV(d){ return d.map(r=>r.join('\t')).join('\n'); }
-function toCSV(d){
-  const q=v=>{v=String(v??'');return(v.includes(',')||v.includes('"'))?'"'+v.replace(/"/g,'""')+'"':v;};
-  return d.map(r=>r.map(q).join(',')).join('\n');
-}
-function copyTSV(){
-  const t=toTSV(buildRows());
-  (navigator.clipboard?.writeText(t)||Promise.reject())
-    .then(()=>toast('Copied — paste into Google Sheets ✓'))
-    .catch(()=>{fallbackCopy(t);toast('Copied — paste into Google Sheets ✓');});
-}
-function fallbackCopy(t){
-  const el=Object.assign(document.createElement('textarea'),{value:t,style:'position:fixed;opacity:0'});
-  document.body.appendChild(el);el.select();document.execCommand('copy');el.remove();
-}
-function downloadCSV(){
-  const a=Object.assign(document.createElement('a'),{
-    href:URL.createObjectURL(new Blob([toCSV(buildRows())],{type:'text/csv'})),
-    download:'gm_trip_plan.csv'
-  });
-  a.click();URL.revokeObjectURL(a.href);
-}
-
-/* ─── Utils ─── */
-function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
-function show(id){document.getElementById(id).classList.remove('hidden');}
-function hide(id){document.getElementById(id).classList.add('hidden');}
-function clearAll(){
-  sessions=[];trips=[];solos=[];
-  document.getElementById('pasteArea').value='';
-  document.getElementById('parseInfo').classList.add('hidden');
-  hide('optCard');hide('resultCard');
-}
-function toast(msg){
-  const t=document.getElementById('toast');
-  t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2800);
-}
-if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
-</script>
-</body>
-</html>
+function toTSV(d){return d.map(r=>r.join('\t')).join('\n');}
+function toCSV(d){const q=v=>{v=String(v??'');return(v.includes(',')||v.includes('"'))?'"'+v.replace(/"/g,'""')+'"':v;};return d.map(r=>r.map(q).join(',')).join('\n');}
+function copyTSV(){const t=toTSV(buildRows());(navigator.clipboard?.writeText(t)||Promise.reject()).then(()=>toast('Copied ✓')).catch(()=>{fa
