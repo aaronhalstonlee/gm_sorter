@@ -56,7 +56,7 @@ select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0
 </head>
 <body>
 
-<h1>✈️ GM Training Trip Planner <span style="font-size:.7rem;color:#484868;font-weight:400">v5</span></h1>
+<h1>✈️ GM Training Trip Planner <span style="font-size:.7rem;color:#484868;font-weight:400">v6</span></h1>
 <p class="sub">Paste your schedule → groups by location into efficient trips · ≤1 day gap rule</p>
 
 <div class="card">
@@ -255,6 +255,13 @@ function runGrouping() {
 
   Object.entries(byLoc).forEach(([loc,cls]) => {
     cls.sort((a,b)=>a.date-b.date);
+
+    // Remove earlier duplicate: if same course on consecutive days, drop the earlier one
+    const deduped = cls.filter((s,i) => {
+      const next = cls[i+1];
+      if (next && next.course === s.course && diffDays(s.date, next.date) <= 1) return false;
+      return true;
+    });
     let cluster=[cls[0]];
     for (let i=1; i<cls.length; i++) {
       const gap = diffDays(cls[i-1].date, cls[i].date);
