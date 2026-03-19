@@ -56,7 +56,7 @@ select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0
 </head>
 <body>
 
-<h1>✈️ GM Training Trip Planner <span style="font-size:.7rem;color:#484868;font-weight:400">v11</span></h1>
+<h1>✈️ GM Training Trip Planner <span style="font-size:.7rem;color:#484868;font-weight:400">v12</span></h1>
 <p class="sub">Paste your schedule → groups by location into efficient trips · ≤1 day gap rule</p>
 
 <div class="card">
@@ -375,12 +375,10 @@ function show(id){document.getElementById(id).classList.remove('hidden');}
 function hide(id){document.getElementById(id).classList.add('hidden');}
 function clearAll(){sessions=[];trips=[];solos=[];document.getElementById('pasteArea').value='';document.getElementById('debugOut').classList.add('hidden');hide('optCard');hide('resultCard');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
+// Unregister any existing service workers — no more caching
 if ('serviceWorker' in navigator) {
-  // Unregister ALL existing service workers, then register fresh
   navigator.serviceWorker.getRegistrations().then(regs => {
-    Promise.all(regs.map(r => r.unregister())).then(() => {
-      navigator.serviceWorker.register('sw.js');
-    });
+    regs.forEach(r => r.unregister());
   });
 }
 </script>
