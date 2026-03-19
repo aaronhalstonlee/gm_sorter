@@ -56,7 +56,7 @@ select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0
 </head>
 <body>
 
-<h1>✈️ GM Training Trip Planner <span style="font-size:.7rem;color:#484868;font-weight:400">v4</span></h1>
+<h1>✈️ GM Training Trip Planner <span style="font-size:.7rem;color:#484868;font-weight:400">v5</span></h1>
 <p class="sub">Paste your schedule → groups by location into efficient trips · ≤1 day gap rule</p>
 
 <div class="card">
@@ -149,15 +149,16 @@ function isCourseCode(s) {
   return /^\d{4,6}\.\d{2}[A-Za-z0-9]/.test(s.trim());
 }
 
-function parseDate(s) {
+function parseDateRange(s) {
+  // Returns {start, end} — extracts both dates from "3/19/2026 8:00 AM to 3/20/2026 5:00 PM"
   if (!s) return null;
-  // Extract first date pattern M/D/YYYY from the cell value
-  const m = s.match(/(\d{1,2})\/(\d{1,2})\/(\d{4})/);
-  if (m) {
-    const d = new Date(+m[3], +m[1]-1, +m[2]);
-    if (!isNaN(d)) return d;
-  }
-  return null;
+  const all = [...s.matchAll(/(\d{1,2})\/(\d{1,2})\/(\d{4})/g)];
+  if (!all.length) return null;
+  const toDate = m => new Date(+m[1], +m[2]-1, +m[3]);
+  // first match group indices: full, m1, m2, m3
+  const start = new Date(+all[0][3], +all[0][1]-1, +all[0][2]);
+  const end   = all.length > 1 ? new Date(+all[1][3], +all[1][1]-1, +all[1][2]) : start;
+  return isNaN(start) ? null : { start, end };
 }
 
 function fmtDate(d){ return d?d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}):'?'; }
@@ -196,13 +197,13 @@ function loadData() {
     const note = colH.toLowerCase();
     const isFlagged = isX || note.includes('conflict') || note.includes('cutoff') || note.includes('past');
 
-    const date = parseDate(colB);
+    const range = parseDateRange(colB);
     const center = colD;
 
-    if (!date || !center) { skippedNoData++; continue; }
+    if (!range || !center) { skippedNoData++; continue; }
 
     const seats = parseInt(colC) || 0;
-    parsed.push({ course:currentCourse, date, center, city:[colE,colF].filter(Boolean).join(', '), seats, isX:isFlagged, colC });
+    parsed.push({ course:currentCourse, date:range.start, dateEnd:range.end, center, city:[colE,colF].filter(Boolean).join(', '), seats, isX:isFlagged, colC });
   }
 
   sessions = parsed;
@@ -263,27 +264,12 @@ function runGrouping() {
     flush(loc,cluster,tid++);
   });
 
-  function dedupe(cls) {
-    // Collapse consecutive rows with same course code into one entry with a date range
-    const out = [];
-    for (const s of cls) {
-      const prev = out[out.length - 1];
-      if (prev && prev.course === s.course && diffDays(prev.dateEnd, s.date) <= 1) {
-        prev.dateEnd = s.date; // extend the range
-      } else {
-        out.push({ ...s, dateEnd: s.date });
-      }
-    }
-    return out;
-  }
-
   function flush(loc,cls,id){
     const s0=cls[0];
     const city=groupMode==='center'?s0.city:loc;
-    const deduped=dedupe(cls);
-    const start=cls[0].date, end=cls[cls.length-1].date;
-    const obj={id,loc,city,cls:deduped,start,end,nights:diffDays(start,end)};
-    if(deduped.length===1) solos.push(obj); else trips.push(obj);
+    const start=cls[0].date, end=cls[cls.length-1].dateEnd;
+    const obj={id,loc,city,cls,start,end,nights:diffDays(start,end)};
+    if(cls.length===1) solos.push(obj); else trips.push(obj);
   }
 
   show('resultCard'); renderResults();
