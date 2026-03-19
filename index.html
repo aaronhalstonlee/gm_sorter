@@ -213,14 +213,18 @@ function loadData() {
   log += `Course codes found: ${courseCodes.size} → [${[...courseCodes].slice(0,4).join(', ')}${courseCodes.size>4?'…':''}]\n`;
   log += `Sessions parsed: ${parsed.length} total · ${valid} valid · ${flagged} flagged (✕) · ${skippedNoData} skipped (no date/center)\n`;
 
-  // Show sample of first 3 valid sessions for verification
-  const samples = parsed.filter(s=>!s.isX).slice(0,3);
-  samples.forEach(s => {
-    log += `  → ${s.course} | ${fmtDate(s.date)} | ${s.center}\n`;
-  });
+  // Show raw content of first 5 non-course-code rows for diagnosis
+  log += `\n<span class="warn">── First 5 data rows (raw col values) ──</span>\n`;
+  let shown = 0;
+  for (const r of rows) {
+    const a = (r[0]||'').trim();
+    if (isCourseCode(a)) continue;
+    if (shown++ >= 5) break;
+    log += `  [0]="${a}" [1]="${(r[1]||'').slice(0,40)}" [2]="${(r[2]||'')}" [3]="${(r[3]||'').slice(0,30)}" [4]="${(r[4]||'')}" cols=${r.length}\n`;
+  }
 
   if (parsed.length === 0) {
-    log += `<span class="warn">⚠ No sessions parsed — check that Col B has dates and Col D has location names</span>\n`;
+    log += `<span class="warn">⚠ 0 sessions — date or center not found in expected columns</span>\n`;
   }
 
   dbg.innerHTML = log;
