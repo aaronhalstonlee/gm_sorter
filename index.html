@@ -8,65 +8,94 @@
 <title>GM Training Trip Planner</title>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:system-ui,-apple-system,sans-serif;background:#0f0f1a;color:#e0e0f0;min-height:100vh;padding:16px;max-width:1000px;margin:0 auto}
-h1{font-size:1.4rem;font-weight:700;color:#a0b4ff;margin-bottom:2px}
-.sub{font-size:.78rem;color:#484868;margin-bottom:20px}
-.card{background:#1a1a2e;border:1px solid #252545;border-radius:10px;padding:16px;margin-bottom:14px}
-.card h2{font-size:.74rem;font-weight:700;color:#6070b0;text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px}
-textarea{width:100%;height:140px;background:#0d0d18;border:1px solid #252545;border-radius:6px;color:#e0e0f0;font-family:monospace;font-size:.75rem;padding:10px;resize:vertical}
-textarea:focus{outline:none;border-color:#4555cc}
-button{padding:7px 14px;border:none;border-radius:6px;font-size:.8rem;font-weight:600;cursor:pointer;transition:opacity .15s}
-button:hover{opacity:.82}button:active{opacity:.62}
-.bp{background:#3a55e0;color:#fff}
-.bs{background:#202040;color:#9090c0}
-.bg{background:#102a1e;color:#40d090}
-.sm{padding:4px 10px;font-size:.74rem}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
-select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0f0;padding:6px 9px;font-size:.8rem}
+body{font-family:system-ui,-apple-system,sans-serif;background:#eef1f5;color:#1a2535;min-height:100vh;margin:0}
+
+/* ── Top nav bar matching GM Global Connect ── */
+.topbar{background:#0d1a2e;padding:0 20px;height:56px;display:flex;align-items:center;gap:12px;box-shadow:0 2px 8px rgba(0,0,0,.35)}
+.topbar .gm-badge{background:#fff;border-radius:4px;width:36px;height:36px;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:900;color:#0d1a2e;letter-spacing:-.5px;flex-shrink:0}
+.topbar h1{font-size:1.05rem;font-weight:700;color:#fff;letter-spacing:.01em}
+.topbar .ver{font-size:.68rem;color:#4a6080;margin-left:6px;font-weight:400}
+
+/* ── Teal welcome banner ── */
+.banner{background:linear-gradient(90deg,#007a8a,#00b5c8);padding:10px 20px;font-size:.8rem;color:#fff;font-weight:500}
+
+/* ── Page content ── */
+.page{padding:20px;max-width:1000px;margin:0 auto}
+
+.card{background:#fff;border:1px solid #dce3ec;border-radius:8px;padding:18px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+.card h2{font-size:.72rem;font-weight:700;color:#0072ce;text-transform:uppercase;letter-spacing:.07em;margin-bottom:12px;border-bottom:2px solid #e8f0fa;padding-bottom:6px}
+
+textarea{width:100%;height:140px;background:#f7f9fc;border:1px solid #c8d4e0;border-radius:6px;color:#1a2535;font-family:monospace;font-size:.75rem;padding:10px;resize:vertical}
+textarea:focus{outline:none;border-color:#0072ce;box-shadow:0 0 0 3px rgba(0,114,206,.12)}
+textarea::placeholder{color:#8a9ab0}
+
+button{padding:7px 16px;border:none;border-radius:5px;font-size:.8rem;font-weight:600;cursor:pointer;transition:all .15s}
+button:hover{filter:brightness(1.08)}button:active{filter:brightness(.95)}
+.bp{background:#0072ce;color:#fff}
+.bs{background:#e8edf3;color:#4a6080;border:1px solid #c8d4e0}
+.bg{background:#007a8a;color:#fff}
+.sm{padding:4px 12px;font-size:.74rem}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}
+
+select{background:#f7f9fc;border:1px solid #c8d4e0;border-radius:5px;color:#1a2535;padding:6px 10px;font-size:.8rem}
+select:focus{outline:none;border-color:#0072ce}
+
 .hidden{display:none!important}
+
 .opts{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0}
-.opt{padding:5px 12px;border-radius:20px;border:1px solid #252545;background:#12122a;color:#7080b0;font-size:.75rem;cursor:pointer;transition:all .15s}
-.opt.on{background:#2a3a80;border-color:#4555cc;color:#c8d4ff}
-.stat-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px}
-.stat{background:#141424;border:1px solid #202040;border-radius:8px;padding:8px 14px;text-align:center;min-width:80px}
-.stat-n{font-size:1.3rem;font-weight:700;color:#a0b4ff}
-.stat-l{font-size:.68rem;color:#484868;margin-top:1px}
+.opt{padding:5px 14px;border-radius:20px;border:1px solid #c8d4e0;background:#f0f4f9;color:#4a6080;font-size:.75rem;cursor:pointer;transition:all .15s}
+.opt:hover{border-color:#0072ce;color:#0072ce}
+.opt.on{background:#e8f0fa;border-color:#0072ce;color:#0072ce;font-weight:600}
+
+.stat-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px}
+.stat{background:#f0f6ff;border:1px solid #c8d8f0;border-radius:8px;padding:10px 16px;text-align:center;min-width:80px}
+.stat-n{font-size:1.3rem;font-weight:700;color:#0072ce}
+.stat-l{font-size:.67rem;color:#6a80a0;margin-top:2px}
+
 #results{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:12px}
-.trip{background:#0d0d1e;border:1px solid #202040;border-radius:10px;padding:14px}
-.trip-header{display:flex;align-items:flex-start;gap:8px;margin-bottom:10px}
-.trip-num{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;flex-shrink:0}
-.trip-meta h3{font-size:.88rem;font-weight:700;color:#c8d8ff;margin-bottom:1px}
-.trip-meta .city{font-size:.72rem;color:#484868}
-.trip-meta .dates{font-size:.72rem;color:#5060a0}
-.cls{padding:7px 0;border-bottom:1px solid #161628;font-size:.76rem}
+.trip{background:#fff;border:1px solid #dce3ec;border-radius:8px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,.05);border-left:4px solid #0072ce}
+.trip-header{display:flex;align-items:flex-start;gap:10px;margin-bottom:10px}
+.trip-num{width:30px;height:30px;border-radius:50%;background:#0072ce;color:#fff;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;flex-shrink:0}
+.trip-meta h3{font-size:.88rem;font-weight:700;color:#0d1a2e;margin-bottom:1px}
+.trip-meta .city{font-size:.72rem;color:#6a80a0}
+.trip-meta .dates{font-size:.72rem;color:#0072ce;margin-top:2px}
+.trip-meta .dist{font-size:.68rem;color:#8a9ab0;margin-top:2px}
+
+.cls{padding:7px 0;border-bottom:1px solid #eef1f5}
 .cls:last-child{border-bottom:none}
-.cls-date{color:#4555a0;font-size:.7rem;margin-bottom:2px}
-.cls-course{color:#c8d0e8;font-weight:600;font-size:.78rem}
-.cls-seats{color:#484868;font-size:.68rem;margin-top:1px}
-.gap-warn{display:inline-block;background:#2a1a00;color:#d08030;font-size:.67rem;padding:1px 6px;border-radius:4px;margin-left:6px}
-.section-label{font-size:.72rem;font-weight:700;color:#484868;text-transform:uppercase;letter-spacing:.06em;margin:14px 0 8px;grid-column:1/-1}
-.sort-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
-.sort-row label{font-size:.75rem;color:#5060a0}
-.debug{background:#0a1a0a;border:1px solid #1a3a1a;border-radius:6px;padding:10px 12px;font-size:.72rem;color:#408040;margin-top:10px;line-height:2;font-family:monospace;white-space:pre-wrap;max-height:200px;overflow-y:auto}
-.debug .warn{color:#c08030}
-.debug .ok{color:#40d090}
-#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(70px);background:#103828;color:#40d090;padding:9px 20px;border-radius:20px;font-size:.8rem;transition:transform .3s;z-index:999;pointer-events:none}
+.cls-date{color:#007a8a;font-size:.7rem;margin-bottom:2px;font-weight:500}
+.cls-course{color:#1a2535;font-weight:600;font-size:.78rem}
+.cls-seats{color:#8a9ab0;font-size:.68rem;margin-top:1px}
+.gap-warn{display:inline-block;background:#fff3e0;color:#e65100;font-size:.67rem;padding:1px 6px;border-radius:4px;margin-left:6px;border:1px solid #ffcc80}
+
+.section-label{font-size:.72rem;font-weight:700;color:#4a6080;text-transform:uppercase;letter-spacing:.07em;margin:14px 0 8px;grid-column:1/-1;display:flex;align-items:center;gap:10px}
+.solo-toggle{padding:3px 12px;font-size:.7rem;font-weight:600;border:1px solid #c8d4e0;background:#f0f4f9;color:#4a6080;border-radius:10px;cursor:pointer;transition:all .15s}
+.solo-toggle:hover{border-color:#0072ce;color:#0072ce}
+.solo-toggle.open{background:#e8f0fa;color:#0072ce;border-color:#0072ce}
+
+.results-header{display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%) translateY(70px);background:#007a8a;color:#fff;padding:9px 20px;border-radius:20px;font-size:.8rem;transition:transform .3s;z-index:999;pointer-events:none;box-shadow:0 4px 12px rgba(0,0,0,.2)}
 #toast.show{transform:translateX(-50%) translateY(0)}
 </style>
 </head>
 <body>
 
-<h1>✈️ GM Training Trip Planner <span style="font-size:.7rem;color:#484868;font-weight:400">v13</span></h1>
-<p class="sub">Paste your schedule → groups by location into efficient trips · ≤1 day gap rule</p>
+<div class="topbar">
+  <div class="gm-badge">gm</div>
+  <h1>Training Trip Planner <span class="ver">v14</span></h1>
+</div>
+<div class="banner">✈️ Sorted by proximity to SeaTac · Paste your schedule, filter, and group into efficient trips</div>
 
+<div class="page">
 <div class="card">
   <h2>1 — Paste your schedule from Google Sheets</h2>
   <textarea id="pasteArea" placeholder="Select all cells in your schedule sheet and paste here (Ctrl+A, Ctrl+C in Sheets)."></textarea>
   <div class="row">
     <button class="bp" onclick="loadData()">Parse Schedule</button>
     <button class="bs sm" onclick="clearAll()">Clear</button>
+    <span id="parseInfo" style="font-size:.75rem;color:#484868"></span>
   </div>
-  <div id="debugOut" class="debug hidden"></div>
 </div>
 
 <div class="card hidden" id="optCard">
@@ -89,13 +118,7 @@ select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0
 <div class="card hidden" id="resultCard">
   <h2>3 — Your trips</h2>
   <div class="stat-bar" id="statBar"></div>
-  <div class="sort-row">
-    <label>Sort by:</label>
-    <select id="sortMode" onchange="renderResults()">
-      <option value="date">Start date (earliest first)</option>
-      <option value="count">Most sessions first</option>
-      <option value="loc">Location A→Z</option>
-    </select>
+  <div class="results-header">
     <div style="margin-left:auto;display:flex;gap:8px">
       <button class="bg sm" onclick="copyTSV()">📋 Copy (Sheets)</button>
       <button class="bs sm" onclick="downloadCSV()">⬇ CSV</button>
@@ -104,16 +127,79 @@ select{background:#12122a;border:1px solid #252545;border-radius:6px;color:#e0e0
   <div id="results"></div>
 </div>
 
+</div><!-- /page -->
+
 <div id="toast"></div>
 
 <script>
 let sessions=[], trips=[], solos=[];
 let groupMode='center';
+let solosVisible=false;
 const opts={'skip-x':true,'skip-full':true};
 const PALETTE=['#3a55e0','#2a9d40','#c05020','#9030a0','#20809d','#b09010','#205090','#a03060','#208060','#804010'];
 
-/* ── TSV parser: character-by-character, handles embedded newlines in quoted cells ── */
-function parseTSV(raw) {
+/* ── SeaTac coords ── */
+const SEATAC={lat:47.45,lng:-122.31};
+
+/* ── City coordinate lookup (by city name, lowercase) ── */
+const COORDS={
+  'garland':      [32.91,-96.64],
+  'denver':       [39.74,-104.98],
+  'sanford':      [28.80,-81.27],
+  'livermore':    [37.68,-121.77],
+  'anchorage':    [61.22,-149.90],
+  'mansfield':    [42.03,-71.22],
+  'rolling meadows':[42.07,-88.02],
+  'vancouver':    [45.64,-122.66],
+  'troy':         [42.61,-83.15],
+  'alpharetta':   [34.08,-84.30],
+  'ardsley':      [41.02,-73.84],
+  'matthews':     [35.12,-80.72],
+  'spring hill':  [35.75,-86.93],
+  'laporte':      [29.67,-95.02],
+  'avondale':     [33.44,-112.35],
+  'canton':       [40.80,-81.38],
+  'baltimore':    [39.29,-76.61],
+  'ankeny':       [41.73,-93.60],
+  'rosemount':    [44.74,-93.12],
+  'hollywood':    [26.01,-80.15],
+  'orchard park': [42.77,-78.74],
+  'harrisburg':   [40.27,-76.89],
+  'new orleans':  [29.95,-90.07],
+  'terre haute':  [39.47,-87.41],
+  'dayton':       [39.76,-84.19],
+  'layton':       [41.06,-111.97],
+  'okmulgee':     [35.62,-95.96],
+  'st. louis':    [38.63,-90.20],
+  'glendale':     [34.14,-118.26],
+  'san antonio':  [29.42,-98.49],
+};
+
+function haversine(lat1,lng1,lat2,lng2){
+  const R=3958.8, r=Math.PI/180;
+  const dLat=(lat2-lat1)*r, dLng=(lng2-lng1)*r;
+  const a=Math.sin(dLat/2)**2+Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin(dLng/2)**2;
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+
+function distFromSEA(trip){
+  // Use city field (e.g. "Garland, TX") — extract city name
+  const city=(trip.city||'').split(',')[0].trim().toLowerCase();
+  const coords=COORDS[city];
+  if(!coords)return 99999;
+  return haversine(SEATAC.lat,SEATAC.lng,coords[0],coords[1]);
+}
+
+function fmtMiles(trip){
+  const city=(trip.city||'').split(',')[0].trim().toLowerCase();
+  const coords=COORDS[city];
+  if(!coords)return '';
+  const mi=Math.round(haversine(SEATAC.lat,SEATAC.lng,coords[0],coords[1]));
+  return `${mi.toLocaleString()} mi from SEA`;
+}
+
+/* ── TSV parser ── */
+function parseTSV(raw){
   const rows=[];
   let cells=[], cur='', inQ=false, i=0;
   while(i<raw.length){
@@ -123,18 +209,14 @@ function parseTSV(raw) {
         if(raw[i+1]==='"'){cur+='"';i+=2;continue;}
         else{inQ=false;i++;continue;}
       } else if(c==='\n'||c==='\r'){
-        cur+=' ';
-        if(c==='\r'&&raw[i+1]==='\n')i++;
-        i++;continue;
+        cur+=' ';if(c==='\r'&&raw[i+1]==='\n')i++;i++;continue;
       } else{cur+=c;i++;continue;}
     } else {
       if(c==='"'){inQ=true;i++;continue;}
       else if(c==='\t'){cells.push(cur.trim());cur='';i++;continue;}
       else if(c==='\n'||c==='\r'){
-        cells.push(cur.trim());rows.push(cells);
-        cells=[];cur='';
-        if(c==='\r'&&raw[i+1]==='\n')i++;
-        i++;continue;
+        cells.push(cur.trim());rows.push(cells);cells=[];cur='';
+        if(c==='\r'&&raw[i+1]==='\n')i++;i++;continue;
       } else{cur+=c;i++;continue;}
     }
   }
@@ -157,47 +239,28 @@ function fmtDate(d){return d?d.toLocaleDateString('en-US',{month:'short',day:'nu
 function fmtShort(d){return d?d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):'?';}
 function diffDays(a,b){return Math.round((b-a)/86400000);}
 
-/* ── Step 1: Parse ── */
+/* ── Parse ── */
 function loadData(){
   const raw=document.getElementById('pasteArea').value;
   if(!raw.trim()){alert('Paste your schedule first.');return;}
   const rows=parseTSV(raw);
-  const dbg=document.getElementById('debugOut');
-  dbg.classList.remove('hidden');
-  let log='';
   let currentCourse='(Unknown)';
   const parsed=[], courseCodes=new Set();
-  let skippedNoData=0;
+  let skipped=0;
   for(const r of rows){
-    const colA=(r[0]||'').trim();
-    const colB=(r[1]||'').trim();
-    const colC=(r[2]||'').trim();
-    const colD=(r[3]||'').trim();
-    const colE=(r[4]||'').trim();
-    const colF=(r[5]||'').trim();
-    const colH=(r[7]||'').trim();
+    const colA=(r[0]||'').trim(), colB=(r[1]||'').trim(), colC=(r[2]||'').trim();
+    const colD=(r[3]||'').trim(), colE=(r[4]||'').trim(), colF=(r[5]||'').trim(), colH=(r[7]||'').trim();
     if(isCourseCode(colA)){currentCourse=colA;courseCodes.add(colA);continue;}
-    const isX=colA==='X';
-    const note=colH.toLowerCase();
-    const isFlagged=isX||note.includes('conflict')||note.includes('cutoff')||note.includes('past');
+    const isFlagged=colA==='X'||['conflict','cutoff','past'].some(k=>colH.toLowerCase().includes(k));
     const range=parseDateRange(colB);
-    const center=colD;
-    if(!range||!center){skippedNoData++;continue;}
-    const seats=parseInt(colC)||0;
-    parsed.push({course:currentCourse,date:range.start,dateEnd:range.end,center,city:[colE,colF].filter(Boolean).join(', '),seats,isX:isFlagged,colC});
+    if(!range||!colD){skipped++;continue;}
+    parsed.push({course:currentCourse,date:range.start,dateEnd:range.end,center:colD,city:[colE,colF].filter(Boolean).join(', '),seats:parseInt(colC)||0,isX:isFlagged,colC});
   }
   sessions=parsed;
-  const flagged=parsed.filter(s=>s.isX).length;
-  const valid=parsed.filter(s=>!s.isX).length;
-  log+=`✓ Parsed ${rows.length} rows · ${courseCodes.size} courses · ${parsed.length} sessions (${valid} valid, ${flagged} flagged, ${skippedNoData} skipped)\n`;
-  log+=`v13 grouping active\n`;
-  const samples=parsed.filter(s=>!s.isX).slice(0,3);
-  samples.forEach(s=>log+=`  ${fmtDate(s.date)}–${fmtDate(s.dateEnd)} | ${s.course} | ${s.center}\n`);
-  dbg.textContent=log;
-  if(parsed.length>0){show('optCard');hide('resultCard');}
+  document.getElementById('parseInfo').textContent=`${parsed.length} sessions · ${courseCodes.size} courses`;
+  show('optCard'); hide('resultCard');
 }
 
-/* ── Step 2: Group ── */
 function toggleOpt(el,key){opts[key]=!opts[key];el.classList.toggle('on',opts[key]);}
 function setGroup(mode){
   groupMode=mode;
@@ -205,89 +268,65 @@ function setGroup(mode){
   document.getElementById('opt-group-city').classList.toggle('on',mode==='city');
 }
 
+/* ── Group ── */
 function runGrouping(){
-  // Filter out unwanted sessions
   const filtered=sessions.filter(s=>{
     if(opts['skip-x']&&s.isX)return false;
     if(opts['skip-full']&&s.seats===0)return false;
     return true;
   });
 
-  // Group by location key
   const getKey=s=>groupMode==='center'?s.center:s.city;
   const byLoc={};
   filtered.forEach(s=>{const k=getKey(s);(byLoc[k]=byLoc[k]||[]).push(s);});
 
   trips=[];solos=[];let tid=1;
-  const dbg=document.getElementById('debugOut');
 
   Object.entries(byLoc).forEach(([loc,raw])=>{
-    // Sort by date
     raw.sort((a,b)=>a.date-b.date);
 
-    // DEDUP: for each session, if a LATER session at this location
-    // has the same course within 2 days, drop the earlier one
-    const deduped=raw.filter((s,i)=>{
-      const hasLater=raw.slice(i+1).some(s2=>
-        s2.course===s.course && diffDays(s.date,s2.date)<=2
-      );
-      return !hasLater;
-    });
+    // Dedup: drop earlier session if same course appears within 2 days later
+    const deduped=raw.filter((s,i)=>
+      !raw.slice(i+1).some(s2=>s2.course===s.course&&diffDays(s.date,s2.date)<=2)
+    );
 
-    // Debug Dallas
-    if(loc.includes('Dallas')){
-      let d=`\nDALLAS v13: ${raw.length} raw → ${deduped.length} after dedup\n`;
-      raw.forEach((s,i)=>{
-        const kept=deduped.includes(s);
-        d+=`  [${kept?'KEEP':'DROP'}] ${fmtDate(s.date)} ${s.course}\n`;
-      });
-      d+=`Clusters from deduped:\n`;
-      dbg.textContent+=d;
-    }
-
-    // CLUSTER: group consecutive sessions (≤2 day gap)
+    // Cluster by ≤2 day gap
     const clusters=[];
     let cur=[deduped[0]];
     for(let i=1;i<deduped.length;i++){
-      const gap=diffDays(cur[cur.length-1].dateEnd, deduped[i].date);
-      if(gap<=2){
+      if(diffDays(cur[cur.length-1].dateEnd,deduped[i].date)<=2){
         cur.push(deduped[i]);
       } else {
-        clusters.push(cur.slice()); // copy
+        clusters.push(cur.slice());
         cur=[deduped[i]];
       }
     }
     clusters.push(cur.slice());
 
-    // Debug Dallas clusters
-    if(loc.includes('Dallas')){
-      clusters.forEach((cl,ci)=>{
-        dbg.textContent+=`  Cluster ${ci+1}: ${cl.map(s=>fmtDate(s.date)+' '+s.course).join(' | ')}\n`;
-      });
-    }
-
-    // Store trips/solos
     clusters.forEach(cluster=>{
       const city=groupMode==='center'?cluster[0].city:loc;
-      const start=cluster[0].date;
-      const end=cluster[cluster.length-1].dateEnd;
+      const start=cluster[0].date, end=cluster[cluster.length-1].dateEnd;
       const obj={id:tid++,loc,city,cls:cluster.slice(),start,end,nights:diffDays(start,end)};
       if(cluster.length===1)solos.push(obj);else trips.push(obj);
     });
   });
 
+  solosVisible=false;
   show('resultCard');
   renderResults();
 }
 
-/* ── Step 3: Render ── */
-function renderResults(){
-  const mode=document.getElementById('sortMode').value;
-  const all=[...trips];
-  if(mode==='date')all.sort((a,b)=>a.start-b.start);
-  else if(mode==='count')all.sort((a,b)=>b.cls.length-a.cls.length);
-  else all.sort((a,b)=>a.loc.localeCompare(b.loc));
+/* ── Sort by distance from SEA then alphabetical ── */
+function sortedTrips(arr){
+  return [...arr].sort((a,b)=>{
+    const da=distFromSEA(a), db=distFromSEA(b);
+    if(Math.abs(da-db)>50)return da-db; // >50mi difference = sort by distance
+    return a.loc.localeCompare(b.loc);  // otherwise alphabetical
+  });
+}
 
+/* ── Render ── */
+function renderResults(){
   const total=[...trips,...solos].reduce((s,t)=>s+t.cls.length,0);
   const locs=new Set([...trips,...solos].map(t=>t.loc));
   const courses=new Set([...trips,...solos].flatMap(t=>t.cls.map(c=>c.course)));
@@ -302,21 +341,28 @@ function renderResults(){
   const el=document.getElementById('results');
   let html='';
 
-  if(all.length){
-    html+=`<div class="section-label">✈️ Multi-session trips (${all.length})</div>`;
-    all.forEach((t,i)=>{
+  // Multi-session trips sorted by distance from SEA then alpha
+  const sorted=sortedTrips(trips);
+  if(sorted.length){
+    html+=`<div class="section-label">✈️ Multi-session trips (${sorted.length}) — nearest to SEA first</div>`;
+    sorted.forEach((t,i)=>{
       const col=PALETTE[i%PALETTE.length];
-      const sub=t.city?`<div class="city">${esc(t.city)}</div>`:'';
       const span=t.nights>0?`${fmtShort(t.start)} → ${fmtShort(t.end)} &nbsp;·&nbsp; ${t.nights} night${t.nights!==1?'s':''} on-site`:fmtDate(t.start);
+      const dist=fmtMiles(t);
       html+=`<div class="trip">
         <div class="trip-header">
           <div class="trip-num" style="background:${col}22;color:${col}">${t.cls.length}</div>
-          <div class="trip-meta"><h3>${esc(t.loc)}</h3>${sub}<div class="dates">${span}</div></div>
+          <div class="trip-meta">
+            <h3>${esc(t.loc)}</h3>
+            ${t.city?`<div class="city">${esc(t.city)}</div>`:''}
+            <div class="dates">${span}</div>
+            ${dist?`<div class="dist">📍 ${dist}</div>`:''}
+          </div>
         </div>
         ${t.cls.map((s,ci)=>{
           const gap=ci>0?diffDays(t.cls[ci-1].dateEnd,s.date):0;
           const gw=gap>1?`<span class="gap-warn">⚠ ${gap-1}d gap</span>`:'';
-          const dateStr=s.dateEnd&&diffDays(s.date,s.dateEnd)>0?`${fmtShort(s.date)} → ${fmtShort(s.dateEnd)}`:fmtDate(s.date);
+          const dateStr=diffDays(s.date,s.dateEnd)>0?`${fmtShort(s.date)} → ${fmtShort(s.dateEnd)}`:fmtDate(s.date);
           return `<div class="cls">
             <div class="cls-date">${dateStr}${gw}</div>
             <div class="cls-course">${esc(s.course)}</div>
@@ -327,33 +373,56 @@ function renderResults(){
     });
   }
 
+  // Solo stops — collapsed by default, toggled by button
   if(solos.length){
-    html+=`<div class="section-label">📌 Solo stops</div>`;
-    solos.forEach(t=>{
-      const s=t.cls[0];
-      const dateStr=s.dateEnd&&diffDays(s.date,s.dateEnd)>0?`${fmtShort(s.date)} → ${fmtShort(s.dateEnd)}`:fmtDate(s.date);
-      html+=`<div class="trip">
-        <div class="trip-header">
-          <div class="trip-num" style="background:#30103055;color:#9050c0">1</div>
-          <div class="trip-meta"><h3>${esc(t.loc)}</h3>${t.city?`<div class="city">${esc(t.city)}</div>`:''}<div class="dates">${fmtDate(t.start)}</div></div>
-        </div>
-        <div class="cls">
-          <div class="cls-date">${dateStr}</div>
-          <div class="cls-course">${esc(s.course)}</div>
-          ${s.colC?`<div class="cls-seats">${s.colC} seats available</div>`:''}
-        </div>
-      </div>`;
-    });
+    const btnLabel=solosVisible?`▲ Hide solo stops`:`▼ Show ${solos.length} solo stops`;
+    html+=`<div class="section-label">
+      <span>📌 Solo stops</span>
+      <button class="solo-toggle${solosVisible?' open':''}" onclick="toggleSolos()">${btnLabel}</button>
+    </div>`;
+
+    if(solosVisible){
+      const sortedSolos=sortedTrips(solos);
+      sortedSolos.forEach(t=>{
+        const s=t.cls[0];
+        const dateStr=diffDays(s.date,s.dateEnd)>0?`${fmtShort(s.date)} → ${fmtShort(s.dateEnd)}`:fmtDate(s.date);
+        const dist=fmtMiles(t);
+        html+=`<div class="trip">
+          <div class="trip-header">
+            <div class="trip-num" style="background:#30103055;color:#9050c0">1</div>
+            <div class="trip-meta">
+              <h3>${esc(t.loc)}</h3>
+              ${t.city?`<div class="city">${esc(t.city)}</div>`:''}
+              <div class="dates">${fmtDate(t.start)}</div>
+              ${dist?`<div class="dist">📍 ${dist}</div>`:''}
+            </div>
+          </div>
+          <div class="cls">
+            <div class="cls-date">${dateStr}</div>
+            <div class="cls-course">${esc(s.course)}</div>
+            ${s.colC?`<div class="cls-seats">${s.colC} seats available</div>`:''}
+          </div>
+        </div>`;
+      });
+    }
   }
 
   el.innerHTML=html||'<p style="color:#383858;font-size:.8rem">No results.</p>';
 }
 
+function toggleSolos(){
+  solosVisible=!solosVisible;
+  renderResults();
+}
+
 /* ── Export ── */
 function buildRows(){
-  const all=[...trips,...solos].sort((a,b)=>a.start-b.start);
-  const out=[['Trip ID','Location','City','Start','End','Nights','Course','Date','Seats']];
-  all.forEach(t=>t.cls.forEach(s=>out.push([t.id,t.loc,t.city||'',fmtDate(t.start),fmtDate(t.end),t.nights,s.course,fmtDate(s.date),s.colC||''])));
+  const all=[...sortedTrips(trips),...sortedTrips(solos)];
+  const out=[['Trip ID','Location','City','Miles from SEA','Start','End','Nights','Course','Date','Seats']];
+  all.forEach(t=>{
+    const mi=Math.round(distFromSEA(t));
+    t.cls.forEach(s=>out.push([t.id,t.loc,t.city||'',mi===99999?'':mi,fmtDate(t.start),fmtDate(t.end),t.nights,s.course,fmtDate(s.date),s.colC||'']));
+  });
   return out;
 }
 function toTSV(d){return d.map(r=>r.join('\t')).join('\n');}
@@ -364,10 +433,9 @@ function downloadCSV(){const a=Object.assign(document.createElement('a'),{href:U
 function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
 function show(id){document.getElementById(id).classList.remove('hidden');}
 function hide(id){document.getElementById(id).classList.add('hidden');}
-function clearAll(){sessions=[];trips=[];solos=[];document.getElementById('pasteArea').value='';document.getElementById('debugOut').classList.add('hidden');hide('optCard');hide('resultCard');}
+function clearAll(){sessions=[];trips=[];solos=[];document.getElementById('pasteArea').value='';document.getElementById('parseInfo').textContent='';hide('optCard');hide('resultCard');}
 function toast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2800);}
 
-// Unregister any stale service workers
 if('serviceWorker' in navigator){
   navigator.serviceWorker.getRegistrations().then(regs=>regs.forEach(r=>r.unregister()));
 }
