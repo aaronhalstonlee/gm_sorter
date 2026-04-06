@@ -240,26 +240,61 @@ function fmtShort(d){return d?d.toLocaleDateString('en-US',{month:'short',day:'n
 function diffDays(a,b){return Math.round((b-a)/86400000);}
 
 /* ── Parse ── */
-function loadData(){
-  const raw=document.getElementById('pasteArea').value;
-  if(!raw.trim()){alert('Paste your schedule first.');return;}
-  const rows=parseTSV(raw);
-  let currentCourse='(Unknown)';
-  const parsed=[], courseCodes=new Set();
-  let skipped=0;
-  for(const r of rows){
-    const colA=(r[0]||'').trim(), colB=(r[1]||'').trim(), colC=(r[2]||'').trim();
-    const colD=(r[3]||'').trim(), colE=(r[4]||'').trim(), colF=(r[5]||'').trim(), colH=(r[7]||'').trim();
-    if(isCourseCode(colA)){currentCourse=colA;courseCodes.add(colA);continue;}
-    const isFlagged=colA==='X'||['conflict','cutoff','past'].some(k=>colH.toLowerCase().includes(k));
-    const range=parseDateRange(colB);
-    if(!range||!colD){skipped++;continue;}
-    parsed.push({course:currentCourse,date:range.start,dateEnd:range.end,center:colD,city:[colE,colF].filter(Boolean).join(', '),seats:parseInt(colC)||0,isX:isFlagged,colC});
-  }
-  sessions=parsed;
-  document.getElementById('parseInfo').textContent=`${parsed.length} sessions · ${courseCodes.size} courses`;
-  show('optCard'); hide('resultCard');
+function loadData() {
+    const raw = document.getElementById('pasteArea').value;
+    if (!raw.trim()) { alert('Paste your schedule first.'); return; }
+
+    const rows = parseTSV(raw);
+    const parsed = [];
+    const courseCodes = new Set();
+    let skipped = 0;
+
+    for (const r of rows) {
+        // Skip empty rows
+        if (r.length < 8) continue;
+
+        // New Format Mapping:
+        // col 0: Course ID (16410.12H)
+        // col 1: Course Title
+        // col 2: Start Date (04/07/2026)
+        // col 3: End Date
+        // col 6: Seats (8)
+        // col 7: Location (Denver GM Training Center...)
+        
+        const courseId = (r[0] || '').trim();
+        const range = parseDateRange((r[2] || '').trim()); // Using col 2 for date
+        const seatsStr = (r[6] || '').trim();
+        const location = (r[7] || '').trim();
+
+        if (!range || !location) {
+            skipped++;
+            continue;
+        }
+
+        courseCodes.add(courseId);
+
+        // Extract city from the location string (e.g., "Denver" from "Denver GM Training Center")
+        const cityMatch = location.match(/^[^, ]+/);
+        const cityName = cityMatch ? cityMatch[0] : "";
+
+        parsed.push({
+            course: `${courseId} ${r[1]}`, // Combines ID and Title
+            date: range.start,
+            dateEnd: range.end,
+            center: location,
+            city: cityName, 
+            seats: parseInt(seatsStr) || 0,
+            isX: false, // Set to true if you have a specific 'cancel' indicator in the new data
+            colC: seatsStr // Used for the "seats available" display
+        });
+    }
+
+    sessions = parsed;
+    document.getElementById('parseInfo').textContent = `${parsed.length} sessions · ${courseCodes.size} courses`;
+    show('optCard'); 
+    hide('resultCard');
 }
+
 
 function toggleOpt(el,key){opts[key]=!opts[key];el.classList.toggle('on',opts[key]);}
 function setGroup(mode){
